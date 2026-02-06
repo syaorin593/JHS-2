@@ -2,231 +2,101 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>English Quest: JHS 2nd Grade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英語過去形クエスト EX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <meta property="og:title" content="English Quest: JHS 2nd Grade">
-    <meta property="og:description" content="中学2年生レベルの英語RPG。未来形、助動詞、不定詞などを攻略せよ！">
-    <meta property="og:type" content="game">
 </head>
-<body>
-    <div id="app">
-        <div id="version-display" style="position:absolute; bottom:5px; right:10px; font-size:0.7rem; color:#888; z-index:9999;">ver 5.0 (Random Fix)</div>
+<body class="h-full star-bg overflow-auto text-white selection:bg-purple-500 selection:text-white">
 
-        <div id="explanation-modal" class="modal-overlay hidden">
-            <div class="modal-content explanation-box">
-                <h3 class="text-danger">❌ Incorrect...</h3>
-                <div class="correct-answer-display">
-                    正解: <span id="expl-answer" class="text-success bold"></span>
-                </div>
-                <div class="explanation-text">
-                    <p>【解説】</p>
-                    <p id="expl-text"></p>
-                </div>
-                <button onclick="closeExplanation()" class="btn-primary">次へ進む ➡</button>
-            </div>
-        </div>
+    <div id="app" class="min-h-screen w-full max-w-2xl mx-auto p-4 flex flex-col items-center justify-center">
 
-        <div id="endless-modal" class="modal-overlay hidden">
-            <div class="modal-content">
-                <h3>Check Point</h3>
-                <p>10問クリア！HPが全回復しました。<br>さらに記録を伸ばしますか？</p>
-                <div class="modal-buttons">
-                    <button onclick="continueEndless()" class="btn-primary">続ける (+Bonus)</button>
-                    <button onclick="finishGame(true)" class="btn-warning">記録して帰還</button>
-                </div>
-            </div>
-        </div>
-
-        <button id="debug-btn" class="hidden" onclick="toggleDebugMenu()">🛠️</button>
-        <div id="debug-menu" class="hidden">
-            <h3>Debug Menu</h3>
-            <button onclick="debugUnlockAll()">全開放＆最強</button>
-            <button onclick="debugReset()" style="background:#e74c3c;color:white;">データ完全消去</button>
-            <button onclick="toggleDebugMenu()">閉じる</button>
-        </div>
-
-        <section id="screen-shop" class="screen hidden">
-            <div class="header">
-                <button class="back-btn" onclick="showScreen('screen-stages')">◀ 戻る</button>
-                <h2>Item Shop</h2>
-            </div>
-            <div class="shop-status">
-                所持ゴールド: <span id="shop-gold" class="gold-text">0 G</span>
-            </div>
-            <div class="shop-container">
-                <div class="shop-item">
-                    <div class="item-icon">💊</div>
-                    <div class="item-info">
-                        <div class="item-name">Potion</div>
-                        <div class="item-desc">HPを1回復</div>
-                        <div class="item-price">100 G</div>
-                    </div>
-                    <button onclick="buyItem('potion', 100)" class="btn-buy">購入</button>
-                </div>
-                <div class="shop-item">
-                    <div class="item-icon">💣</div>
-                    <div class="item-info">
-                        <div class="item-name">Bomb</div>
-                        <div class="item-desc">選択肢を2つ消去(4択のみ)</div>
-                        <div class="item-price">150 G</div>
-                    </div>
-                    <button onclick="buyItem('bomb', 150)" class="btn-buy">購入</button>
-                </div>
-                <div class="shop-item">
-                    <div class="item-icon">📜</div>
-                    <div class="item-info">
-                        <div class="item-name">Scroll</div>
-                        <div class="item-desc">最初の単語入力＋頭文字</div>
-                        <div class="item-price">200 G</div>
-                    </div>
-                    <button onclick="buyItem('hint', 200)" class="btn-buy">購入</button>
-                </div>
-                <div class="shop-item">
-                    <div class="item-icon">✏️</div>
-                    <div class="item-info">
-                        <div class="item-name">Magic Pencil</div>
-                        <div class="item-desc">記述を選択問題に変更</div>
-                        <div class="item-price">300 G</div>
-                    </div>
-                    <button onclick="buyItem('pencil', 300)" class="btn-buy">購入</button>
-                </div>
-                <div class="shop-item">
-                    <div class="item-icon">🛡️</div>
-                    <div class="item-info">
-                        <div class="item-name">Shield</div>
-                        <div class="item-desc">ダメージを1回防ぐ</div>
-                        <div class="item-price">250 G</div>
-                    </div>
-                    <button onclick="buyItem('shield', 250)" class="btn-buy">購入</button>
-                </div>
-                <div class="shop-item">
-                    <div class="item-icon">🪙</div>
-                    <div class="item-info">
-                        <div class="item-name">Lucky Coin</div>
-                        <div class="item-desc">クリア時獲得ゴールド2倍</div>
-                        <div class="item-price">400 G</div>
-                    </div>
-                    <button onclick="buyItem('coin', 400)" class="btn-buy">購入</button>
-                </div>
-            </div>
-            <div class="inventory-display">
-                所持数: 
-                💊<span id="inv-potion">0</span> 
-                💣<span id="inv-bomb">0</span> 
-                📜<span id="inv-hint">0</span> 
-                ✏️<span id="inv-pencil">0</span> 
-                🛡️<span id="inv-shield">0</span> 
-                🪙<span id="inv-coin">0</span>
-            </div>
-        </section>
-
-        <section id="screen-title" class="screen">
-            <h1 id="game-title">ENGLISH QUEST</h1>
-            <p class="subtitle">中学2年 英語完全攻略RPG</p>
+        <div id="screen-start" class="w-full text-center animate-pop">
+            <div class="text-7xl mb-4 drop-shadow-lg">⚔️</div>
+            <h1 class="title-font text-4xl md:text-5xl mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 drop-shadow-sm">
+                英語過去形<br>クエスト EX
+            </h1>
             
-            <p id="endless-record-display" class="hidden" style="color:#0984e3; font-weight:bold; margin-top:-10px;">Endless Best: 0 問</p>
-            
-            <div class="player-status-card">
-                <div class="level-badge">Lv.<span id="title-level">1</span></div>
-                <div class="exp-bar-container">
-                    <div id="title-exp-bar" class="exp-bar-fill"></div>
-                </div>
-                <div style="font-size:0.8rem; margin-top:5px;">Next: <span id="title-next-exp">100</span> EXP</div>
-            </div>
-
-            <div class="menu-list">
-                <button onclick="showScreen('screen-stages')" class="btn-primary">⚔️ 冒険に出る (Stages)</button>
-                <button id="btn-endless" onclick="startEndless()" class="btn-warning locked">♾️ エンドレス (Locked)</button>
-                <button onclick="showAchievements()" class="btn-info">🏆 称号・図鑑</button>
-            </div>
-        </section>
-
-        <section id="screen-stages" class="screen hidden">
-            <div class="header">
-                <button class="back-btn" onclick="showScreen('screen-title')">◀ タイトル</button>
-                <h2>Select Stage</h2>
-            </div>
-            <button onclick="showShop()" class="btn-shop">🛒 アイテムショップ (Gold: <span id="stage-gold">0</span>)</button>
-            <div id="stage-list" class="grid-container"></div>
-        </section>
-
-        <section id="screen-game" class="screen hidden">
-            <div id="boss-overlay" class="hidden">WARNING: BOSS BATTLE</div>
-            <div id="shield-overlay" class="hidden">🛡️ SHIELD</div>
-            <div id="coin-overlay" class="hidden">🪙 x2 BONUS</div>
-
-            <div class="game-header">
-                <button onclick="confirmQuit()" class="back-btn-mini">◀</button>
-                <div class="status-center">
-                    <div class="hp-container">
-                        <span style="margin-right:5px;">HP</span>
-                        <div class="hp-bar-bg"><div id="hp-bar-fill"></div></div>
-                    </div>
-                    <span id="score-display">Score: 0</span>
+            <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-8 border border-white/10">
+                <h2 class="text-indigo-200 font-bold mb-4">モードを選択</h2>
+                <div class="space-y-3">
+                    <button onclick="selectGameMode('standard')" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 font-bold rounded-2xl choice-btn text-xl shadow-lg border-b-4 border-blue-800">
+                        🎯 通常10問モード
+                    </button>
+                    <button onclick="selectGameMode('survival')" class="w-full py-4 bg-gradient-to-r from-red-500 to-rose-600 font-bold rounded-2xl choice-btn text-xl shadow-lg border-b-4 border-rose-800">
+                        🔥 サバイバル (命3つ)
+                    </button>
                 </div>
             </div>
-            <div id="progress-bar"><div id="progress-fill"></div></div>
-            <div id="combo-popup" class="hidden"></div>
+            <button onclick="showRanking()" class="text-yellow-300 font-bold hover:underline">🏆 ランキング</button>
+        </div>
 
-            <div id="question-area">
-                <div id="q-category">Theme</div>
-                <div id="q-type-badge">TYPE</div>
-                <p id="q-text">Loading...</p>
-                <div id="writing-status" class="hidden"></div>
-                <div id="choices-container" class="hidden"></div>
-                <div id="sort-container" class="hidden">
-                    <div id="sort-answer-area"></div>
-                    <div id="sort-options-area"></div>
-                    <div class="sort-controls">
-                        <button onclick="resetSort()" class="btn-small">リセット</button>
-                    </div>
-                </div>
-                <div id="writing-container" class="hidden">
-                    <p id="writing-hint" class="hint-text"></p>
-                    <input type="text" id="writing-input" autocomplete="off" placeholder="答えを入力">
-                    <button onclick="checkWritingAnswer()" class="btn-submit">回答する</button>
+        <div id="screen-difficulty" class="w-full max-w-md text-center hidden animate-pop">
+            <h2 class="title-font text-3xl mb-6">難易度を選べ！</h2>
+            <div class="space-y-4">
+                <button onclick="startGame('easy')" class="w-full py-4 bg-emerald-500 font-bold rounded-2xl choice-btn border-b-4 border-emerald-700">🌱 初級 (規則動詞中心)</button>
+                <button onclick="startGame('normal')" class="w-full py-4 bg-amber-500 font-bold rounded-2xl choice-btn border-b-4 border-amber-700">⚔️ 中級 (ミックス)</button>
+                <button onclick="startGame('hard')" class="w-full py-4 bg-purple-600 font-bold rounded-2xl choice-btn border-b-4 border-purple-800">💀 上級 (不規則・難問)</button>
+            </div>
+            <button onclick="backToStart()" class="mt-8 text-indigo-200 hover:text-white">↩ 戻る</button>
+        </div>
+
+        <div id="screen-game" class="w-full max-w-md hidden">
+            <div class="flex justify-between items-center mb-6 bg-slate-900/50 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <div id="life-container" class="text-2xl">❤️❤️❤️</div>
+                <div class="text-right">
+                    <p class="text-xs text-indigo-300 mb-1">SCORE / COMBO</p>
+                    <p class="title-font text-2xl text-yellow-300"><span id="score-display">0</span> <span id="combo-mini" class="text-orange-400 text-sm ml-2"></span></p>
                 </div>
             </div>
 
-            <div id="item-use-area">
-                <button id="btn-use-potion" class="btn-item" onclick="usePotion()">💊<br><span id="game-inv-potion">0</span></button>
-                <button id="btn-use-bomb" class="btn-item" onclick="useBomb()">💣<br><span id="game-inv-bomb">0</span></button>
-                <button id="btn-use-hint" class="btn-item" onclick="useHint()">📜<br><span id="game-inv-hint">0</span></button>
-                <button id="btn-use-pencil" class="btn-item" onclick="usePencil()">✏️<br><span id="game-inv-pencil">0</span></button>
-                <button id="btn-use-shield" class="btn-item" onclick="useShield()">🛡️<br><span id="game-inv-shield">0</span></button>
-                <button id="btn-use-coin" class="btn-item" onclick="useCoin()">🪙<br><span id="game-inv-coin">0</span></button>
+            <div id="question-card" class="game-card rounded-3xl p-8 mb-6 text-center relative overflow-hidden border-b-8 border-indigo-700">
+                <div id="combo-flash" class="absolute inset-0 bg-yellow-400 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+                <span id="q-count" class="text-xs font-bold bg-black/30 px-3 py-1 rounded-full mb-4 inline-block uppercase">1/10</span>
+                <h2 id="verb-base" class="title-font text-5xl mb-3 drop-shadow-md">play</h2>
+                <p id="verb-meaning" class="text-white/80 text-lg font-bold">（〜をする）</p>
             </div>
-        </section>
 
-        <section id="screen-result" class="screen hidden">
-            <h2 id="result-title">RESULT</h2>
-            <div id="rank-badge"></div>
-            <div id="result-stats"></div>
-            <div class="exp-result-box">
-                <div>獲得経験値: <span id="result-exp" class="bold text-success">+0 EXP</span></div>
-                <div>獲得ゴールド: <span id="result-gold" class="bold text-gold">+0 G</span></div>
-                <div class="exp-bar-container">
-                    <div id="result-exp-bar" class="exp-bar-fill"></div>
+            <div id="choices-container" class="grid grid-cols-2 gap-4"></div>
+
+            <div id="writing-container" class="hidden">
+                <input type="text" id="answer-input" class="w-full p-4 rounded-xl bg-white text-slate-800 text-center text-2xl font-bold outline-none ring-4 ring-transparent focus:ring-yellow-400 mb-4" placeholder="過去形を入力" autocomplete="off">
+                <button onclick="checkWritingAnswer()" class="w-full py-4 bg-indigo-500 text-white font-bold rounded-xl shadow-lg border-b-4 border-indigo-700">決定</button>
+            </div>
+        </div>
+
+        <div id="screen-feedback" class="fixed inset-0 flex items-center justify-center bg-black/80 z-50 hidden backdrop-blur-sm">
+            <div class="text-center w-full max-w-sm p-6 animate-pop">
+                <div id="fb-icon" class="text-8xl mb-4">✨</div>
+                <h2 id="fb-text" class="title-font text-4xl text-white mb-2">Great!</h2>
+                <p id="fb-score-detail" class="text-yellow-300 font-bold mb-4"></p>
+                <div id="fb-correct-box" class="hidden bg-red-500/20 border-2 border-red-500 rounded-xl p-4 mb-6">
+                    <p class="text-xs text-red-200 uppercase mb-1">正解は...</p>
+                    <p id="fb-correct-word" class="text-3xl font-bold text-white"></p>
                 </div>
-                <div id="levelup-msg" class="hidden">🆙 LEVEL UP!</div>
+                <button id="next-btn" onclick="nextQuestion()" class="w-full py-4 bg-white text-indigo-900 font-bold rounded-2xl text-xl shadow-lg border-b-4 border-gray-300">次へ (Enter)</button>
             </div>
-            <div class="menu-list">
-                <button onclick="retryGame()">もう一度挑戦</button>
-                <button onclick="showScreen('screen-title')">タイトルへ</button>
-                <button id="next-stage-btn" class="hidden btn-primary" onclick="nextStage()">次のステージへ ➡</button>
-            </div>
-        </section>
+        </div>
 
-        <section id="screen-achievements" class="screen hidden">
-            <div class="header">
-                <button class="back-btn" onclick="showScreen('screen-title')">◀ 戻る</button>
-                <h2>Achievements</h2>
+        <div id="screen-result" class="w-full max-w-md text-center hidden animate-pop">
+            <div class="text-8xl mb-4">🏆</div>
+            <h2 class="title-font text-3xl mb-2 text-white">リザルト</h2>
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/10">
+                <p id="final-score" class="text-5xl font-bold text-yellow-300">0</p>
+                <p id="final-stats" class="text-sm text-indigo-200 mt-2"></p>
             </div>
-            <div id="achievement-stats"></div>
-            <div id="achievement-list"></div>
-        </section>
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="player-name" placeholder="名前を入力" class="flex-1 p-3 rounded-xl text-black">
+                <button onclick="saveScore()" class="bg-green-500 px-4 rounded-xl font-bold border-b-4 border-green-700">保存</button>
+            </div>
+            <div class="space-y-3">
+                <button onclick="shareResult()" class="w-full py-3 bg-blue-500 font-bold rounded-xl border-b-4 border-blue-700">📋 結果をコピー</button>
+                <button onclick="backToStart()" class="w-full py-3 bg-white/20 font-bold rounded-xl">🏠 タイトルへ</button>
+            </div>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
